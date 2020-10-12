@@ -18,6 +18,8 @@ import json
 from glob import glob
 from PIL import Image
 import pickle
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Download caption annotation files
 annotation_folder = '/annotations/'
@@ -49,7 +51,7 @@ with open(annotation_file, 'r') as f:
 # Group all captions together having the same image ID.
 image_path_to_caption = collections.defaultdict(list)
 for val in annotations['annotations']:
-  caption = f"<start> {val['caption']} <end>"  
+  caption = "<start> {} <end>".format(val['caption'])  
   image_path = PATH + 'COCO_train2014_' + '%012d.jpg' % (val['image_id'])
   image_path_to_caption[image_path].append(caption)
 
@@ -131,6 +133,12 @@ max_length = calc_max_length(train_seqs)
 img_to_cap_vector = collections.defaultdict(list)
 for img, cap in zip(img_name_vector, cap_vector):
   img_to_cap_vector[img].append(cap)
+
+f = open('token.obj', 'wb')
+pickle.dump(tokenizer, f)
+
+m = open('max_length.obj', 'wb')
+pickle.dump(max_length, m)
 
 # Create training and validation sets using an 80-20 split randomly.
 img_keys = list(img_to_cap_vector.keys())
